@@ -1,0 +1,50 @@
+''' 
+K-Nearest Neighbors for Classification Iris dataset
+'''
+
+# Get data
+from sklearn import datasets
+from sklearn.model_selection import train_test_split
+import numpy as np
+iris = datasets.load_iris()
+
+# Prepare data
+X, y = iris.data, iris.target
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=1234)
+# Checking  shapes
+print(f'X-training: {X_train.shape} -  y-training: {y_train.shape}')
+print(f'X-testing: {X_test.shape} -  y-testing: {y_test.shape}')
+
+# Training and Testing
+''' List of k values to evaluate which value works better '''
+neighbors = [i+1 for i in range(7)]
+
+for neighbor in neighbors:
+    y_pred = []
+    for n in range(len(X_test)):
+        x_test = X_test[n]
+        dist = []
+        for i in range(len(X_train)):
+            x_train = X_train[i]
+
+            # calculate distance
+            distance = np.sqrt(np.sum((x_test - x_train) ** 2))
+            dist.append([distance, y_train[i]])
+
+        dist = sorted(dist)
+        ranked = dist[:neighbor]
+        ranked = [rank[1] for rank in ranked]
+
+        most_common_label = [[ranked.count(number),number] for number in ranked]
+        predicted_label = sorted(most_common_label)[0][1]
+        #print(f'Predicted value: {predicted_label} - True value: {y_test[n]}')
+        y_pred.append(predicted_label)
+
+    # Calculate accuracy
+    counter = 0
+    for i in range(len(y_test)):
+        if y_test[i] == y_pred[i]:
+            counter +=1    
+
+    accuracy = counter / len(y_test)
+    print(f'Accuracy : {round((accuracy*100),0)}% - Neighbors: {neighbor}')
